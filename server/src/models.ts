@@ -8,6 +8,7 @@ export const Part = model("Part", new Schema({
 
 export const Booking = model("Booking", new Schema({
   carId: { type: String, required: true, unique: true },
+  valid: { type: Boolean, default: true }, completedAt: Date,
   customerName: { type: String, required: true }, phone: { type: String, required: true },
   make: String, model: String, year: Number, chassisNo: String,
   service: { type: String, required: true }, date: String, time: String, notes: String,

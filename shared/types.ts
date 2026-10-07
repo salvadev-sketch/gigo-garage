@@ -9,7 +9,7 @@ export interface Part {
   price: number; stock: number; source: PartSource; leadTimeWeeks?: number;
 }
 export interface Booking {
-  _id: string; carId: string; customerName: string; phone: string;
+  _id: string; carId: string; valid: boolean; completedAt?: string; customerName: string; phone: string;
   make: string; model: string; year: number; chassisNo?: string;
   service: string; date: string; time: string; notes?: string; status: BookingStatus;
 }
@@ -28,4 +28,6 @@ export interface ChinaRequest {
 export interface QueueItem {
   carId: string; make?: string; model?: string; year?: number;
   service: string; status: BookingStatus; position: number | null;
+  /** false once the car is repaired (done) or the booking is cancelled */
+  valid?: boolean;
 }

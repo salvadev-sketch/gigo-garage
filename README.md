@@ -42,7 +42,8 @@ cd client && npm install && npm run dev
 | POST | /api/bookings | Create booking, returns Car ID (GA-0001) and waiting list position |
 | GET | /api/queue | Public waiting list of cars in the garage |
 | GET | /api/track/:carId | Public status and position by Car ID |
-| GET/PATCH | /api/bookings (admin) | List / update status |
+| GET | /api/bookings (admin) | List all bookings |
+| PATCH | /api/bookings/:id (admin) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
 | POST | /api/orders | Create order |
 | POST | /api/china-requests | Request a part from China |
 | PATCH | /api/china-requests/:id (admin) | Add quote / update status |

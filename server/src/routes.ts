@@ -20,7 +20,7 @@ r.get("/parts", async (req, res) => {
 const ACTIVE = ["pending", "confirmed", "in_progress"];
 const activeBookings = () => Booking.find({ status: { $in: ACTIVE } }).sort({ createdAt: 1 });
 const publicItem = (b: any, i: number) => ({
-  carId: b.carId, make: b.make, model: b.model, year: b.year, service: b.service, status: b.status, position: i + 1,
+  carId: b.carId, make: b.make, model: b.model, year: b.year, service: b.service, status: b.status, position: i + 1, valid: true,
 });
 
 r.post("/bookings", async (req, res) => {
@@ -44,11 +44,26 @@ r.get("/track/:carId", async (req, res) => {
   if (i >= 0) return res.json(publicItem(list[i], i));
   const b = await Booking.findOne({ carId });
   if (!b) return res.status(404).json({ error: "Car ID not found" });
-  res.json({ carId: b.carId, make: b.make, model: b.model, year: b.year, service: b.service, status: b.status, position: null });
+  // Closed booking: the Car ID is no longer valid.
+  res.json({ carId: b.carId, make: b.make, model: b.model, year: b.year, service: b.service, status: b.status, position: null, valid: false });
 });
 r.get("/bookings", admin, async (_req, res) => res.json(await Booking.find().sort({ createdAt: -1 })));
-r.patch("/bookings/:id", admin, async (req, res) =>
-  res.json(await Booking.findByIdAndUpdate(req.params.id, req.body, { new: true })));
+// Update a booking. Setting status to "done" (car repaired and working) or "cancelled"
+// invalidates the Car ID and removes the car from the public waiting list.
+const CLOSED = ["done", "cancelled"];
+r.patch("/bookings/:id", admin, async (req, res) => {
+  const { status, notes } = req.body;
+  const update: Record<string, unknown> = {};
+  if (notes !== undefined) update.notes = notes;
+  if (status) {
+    update.status = status;
+    if (CLOSED.includes(status)) { update.valid = false; update.completedAt = new Date(); }
+    else { update.valid = true; update.$unset = { completedAt: 1 }; }
+  }
+  const b = await Booking.findByIdAndUpdate(req.params.id, update, { new: true });
+  if (!b) return res.status(404).json({ error: "Booking not found" });
+  res.json(b);
+});
 
 r.post("/orders", async (req, res) => res.status(201).json(await Order.create(req.body)));
 r.get("/orders", admin, async (_req, res) => res.json(await Order.find().sort({ createdAt: -1 })));

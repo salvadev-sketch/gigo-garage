@@ -146,7 +146,9 @@ export default function Garage() {
         {tracked === "none" && <p className="msg-err" role="alert">Car ID not found.</p>}
         {tracked && tracked !== "none" && (
           <p className="msg-ok" role="status">
-            {tracked.carId}: {labelFor(tracked.status).text}{tracked.position ? ` · position ${tracked.position} in the waiting list` : ""}
+            {tracked.valid === false
+              ? `${tracked.carId} is no longer valid. The repair is complete or the booking is closed.`
+              : `${tracked.carId}: ${labelFor(tracked.status).text}${tracked.position ? ` · position ${tracked.position} in the waiting list` : ""}`}
           </p>
         )}
         <div className="qwrap">
