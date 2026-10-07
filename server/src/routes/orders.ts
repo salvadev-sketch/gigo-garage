@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Order, Part, nextOrderNo } from "../models/index.js";
-import { admin } from "../middleware/admin.js";
+import { shopAdmin } from "../middleware/admin.js";
 import { shopConfig } from "../config.js";
 import { computeTotals } from "../../../shared/pricing.js";
 
@@ -34,6 +34,16 @@ r.post("/orders", async (req, res) => {
   res.status(201).json({ orderNo: order.orderNo, total: order.total });
 });
 
-r.get("/orders", admin, async (_req, res) => res.json(await Order.find().sort({ createdAt: -1 })));
+r.get("/orders", shopAdmin, async (_req, res) => res.json(await Order.find().sort({ createdAt: -1 })));
+
+
+// Shop staff confirm payment (pending -> paid) and close the order (paid -> done).
+r.patch("/orders/:id", shopAdmin, async (req, res) => {
+  const { status } = req.body;
+  if (!["pending", "paid", "done"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+  const o = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+  if (!o) return res.status(404).json({ error: "Order not found" });
+  res.json(o);
+});
 
 export default r;

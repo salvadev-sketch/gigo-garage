@@ -6,7 +6,9 @@ import Garage from "./pages/Garage";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Order from "./pages/Order";
-import Dashboard from "./pages/Dashboard";
+import DashboardHome from "./pages/dashboard/DashboardHome";
+import GarageDashboard from "./pages/dashboard/GarageDashboard";
+import ShopDashboard from "./pages/dashboard/ShopDashboard";
 
 export default function App() {
   return (
@@ -18,7 +20,9 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order" element={<Order />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/dashboard/shop" element={<ShopDashboard />} />
+        <Route path="/dashboard/garage" element={<GarageDashboard />} />
       </Route>
     </Routes>
   );

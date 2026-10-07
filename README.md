@@ -7,7 +7,8 @@ EV and hybrid garage + spare parts shop for Burundi (TypeScript full stack).
 - **Garage**: service booking (confirmed by SMS/WhatsApp)
 - **Cart & Checkout**: Lumicash and bank transfer
 - **Order from China**: request quote, deposit, order tracking
-- **Dashboard**: manage bookings, parts orders and China orders
+- **Shop dashboard** (`/dashboard/shop`): orders and payment confirmation, China requests, parts (prices and stock)
+- **Garage dashboard** (`/dashboard/garage`): bookings and the waiting list; "Car fixed" invalidates the Car ID
 
 ## Stack
 - Client: React + TypeScript + Vite + React Router
@@ -26,7 +27,7 @@ server/src/
   services/queue.ts     garage waiting list logic
   routes/               one router per area (parts, bookings, queue, orders, chinaRequests)
   seed.ts               sample parts
-client/src/             React app (pages: Home, Shop, Garage, Cart, Checkout, Order, Dashboard)
+client/src/             React app (pages: Home, Shop, Garage, Cart, Checkout, Order, dashboard/)
 scripts/check-lines.mjs fails if any file is longer than 300 lines
 ```
 
@@ -42,7 +43,8 @@ cd client && npm install && npm run dev
 
 ## Environment (server/.env)
 - `MONGODB_URI` MongoDB connection string
-- `ADMIN_KEY` secret for admin endpoints (temporary, replace with real auth)
+- `ADMIN_KEY_SHOP` key for the shop dashboard (temporary, replace with real auth)
+- `ADMIN_KEY_GARAGE` key for the garage dashboard (temporary, replace with real auth)
 - `PORT` default 4000
 - `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
@@ -54,12 +56,15 @@ cd client && npm install && npm run dev
 | POST | /api/bookings | Create booking, returns Car ID (GA-0001) and waiting list position |
 | GET | /api/queue | Public waiting list of cars in the garage |
 | GET | /api/track/:carId | Public status and position by Car ID |
-| GET | /api/bookings (admin) | List all bookings |
-| PATCH | /api/bookings/:id (admin) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
+| GET | /api/admin/shop/ping, /api/admin/garage/ping | Check a dashboard key |
+| GET | /api/bookings (garage key) | List all bookings |
+| PATCH | /api/bookings/:id (garage key) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
 | GET | /api/config | Deposit percent and delivery fee |
 | POST | /api/orders | Create order (server recomputes totals), returns order number |
 | POST | /api/china-requests | Request a part from China |
-| PATCH | /api/china-requests/:id (admin) | Add quote / update status |
+| GET/PATCH | /api/china-requests (shop key) | List / add quote and update status |
+| GET/PATCH | /api/orders (shop key) | List orders / confirm payment, mark done |
+| POST/PATCH/DELETE | /api/parts (shop key) | Manage the parts catalogue |
 
 ## Roadmap
 1. Seed parts and vehicle catalogue

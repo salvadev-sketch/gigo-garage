@@ -16,7 +16,7 @@ export default function Layout() {
             <NavLink to="/garage" className={({ isActive }) => (isActive ? "active" : "")}>Garage</NavLink>
             <a href="#contact">About Us</a>
             <a href="#contact">Contact</a>
-            <Link to="/dashboard" className="seller">Seller Dashboard</Link>
+            <Link to="/dashboard" className="seller">Dashboard</Link>
           </nav>
           <div className="tools">
             <Link to="/cart">
