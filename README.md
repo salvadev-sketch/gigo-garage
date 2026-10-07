@@ -25,7 +25,7 @@ client/   React app (src/pages = Home, Shop, Garage, Cart, Checkout, Order, Dash
 ## Run locally
 ```bash
 # server
-cd server && cp .env.example .env && npm install && npm run dev
+cd server && cp .env.example .env && npm install && npm run seed && npm run dev
 # client (new terminal)
 cd client && npm install && npm run dev
 ```

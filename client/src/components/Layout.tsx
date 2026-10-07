@@ -1,8 +1,10 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
+import { useCart } from "./CartContext";
 
 const icon = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "#0F1B1E", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
 export default function Layout() {
+  const { count } = useCart();
   return (
     <>
       <header className="site-header">
@@ -18,7 +20,7 @@ export default function Layout() {
           </nav>
           <div className="tools">
             <Link to="/cart">
-              <svg {...icon} aria-hidden="true"><path d="M5 8h14l-1 12H6z" /><path d="M9 8a3 3 0 0 1 6 0" /></svg>Cart
+              <svg {...icon} aria-hidden="true"><path d="M5 8h14l-1 12H6z" /><path d="M9 8a3 3 0 0 1 6 0" /></svg>Cart{count > 0 ? ` (${count})` : ""}
             </Link>
             <a href="#account">
               <svg {...icon} aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>Account
