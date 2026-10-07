@@ -17,10 +17,20 @@ EV and hybrid garage + spare parts shop for Burundi (TypeScript full stack).
 
 ## Structure
 ```
-shared/   types used by client and server
-server/   Express API (src/index.ts, models.ts, routes.ts)
-client/   React app (src/pages = Home, Shop, Garage, Cart, Checkout, Order, Dashboard)
+shared/                 types and pricing used by client and server
+server/src/
+  index.ts              app bootstrap (Express + MongoDB)
+  config.ts             business settings from env
+  middleware/admin.ts   temporary admin key guard
+  models/               one Mongoose model per file (Part, Booking, Order, ChinaRequest, Counter)
+  services/queue.ts     garage waiting list logic
+  routes/               one router per area (parts, bookings, queue, orders, chinaRequests)
+  seed.ts               sample parts
+client/src/             React app (pages: Home, Shop, Garage, Cart, Checkout, Order, Dashboard)
+scripts/check-lines.mjs fails if any file is longer than 300 lines
 ```
+
+Rule: no source file longer than 300 lines. Check with `node scripts/check-lines.mjs`.
 
 ## Run locally
 ```bash

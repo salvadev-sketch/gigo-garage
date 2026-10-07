@@ -1,6 +1,6 @@
 import "dotenv/config";
 import mongoose from "mongoose";
-import { Part } from "./models.js";
+import { Part } from "./models/index.js";
 
 // SAMPLE DATA ONLY: replace names, part numbers and prices with real stock.
 const sample = [
