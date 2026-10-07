@@ -13,12 +13,14 @@ export interface Booking {
   make: string; model: string; year: number; chassisNo?: string;
   service: string; date: string; time: string; notes?: string; status: BookingStatus;
 }
-export interface OrderItem { partId: string; qty: number; price: number }
+export interface OrderItem { partId: string; name: string; qty: number; price: number; source: PartSource }
 export interface Order {
-  _id: string; items: OrderItem[]; customerName: string; phone: string;
+  _id: string; orderNo: string; items: OrderItem[]; customerName: string; phone: string;
   delivery: "pickup" | "delivery"; address?: string;
-  payment: PaymentMethod; paymentProof?: string; total: number; status: "pending" | "paid" | "done";
+  payment: PaymentMethod; /** Lumicash/bank transaction reference entered by the customer */ paymentProof?: string;
+  subtotal: number; deposit: number; deliveryFee: number; total: number; status: "pending" | "paid" | "done";
 }
+export interface ShopConfig { chinaDepositPercent: number; deliveryFee: number }
 export interface ChinaRequest {
   _id: string; partNo?: string; photoUrl?: string; vehicle: string;
   phone: string; quote?: number; deposit?: number; status: ChinaStatus;

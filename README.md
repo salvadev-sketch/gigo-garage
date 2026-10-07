@@ -34,6 +34,8 @@ cd client && npm install && npm run dev
 - `MONGODB_URI` MongoDB connection string
 - `ADMIN_KEY` secret for admin endpoints (temporary, replace with real auth)
 - `PORT` default 4000
+- `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
+- `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
 
 ## API
 | Method | Path | Purpose |
@@ -44,7 +46,8 @@ cd client && npm install && npm run dev
 | GET | /api/track/:carId | Public status and position by Car ID |
 | GET | /api/bookings (admin) | List all bookings |
 | PATCH | /api/bookings/:id (admin) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
-| POST | /api/orders | Create order |
+| GET | /api/config | Deposit percent and delivery fee |
+| POST | /api/orders | Create order (server recomputes totals), returns order number |
 | POST | /api/china-requests | Request a part from China |
 | PATCH | /api/china-requests/:id (admin) | Add quote / update status |
 

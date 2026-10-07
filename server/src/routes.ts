@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { Part, Booking, Order, ChinaRequest, nextCarId } from "./models.js";
+import { Part, Booking, Order, ChinaRequest, nextCarId, nextOrderNo } from "./models.js";
+import { computeTotals } from "../../shared/pricing.js";
 
 const r = Router();
 
@@ -65,7 +66,38 @@ r.patch("/bookings/:id", admin, async (req, res) => {
   res.json(b);
 });
 
-r.post("/orders", async (req, res) => res.status(201).json(await Order.create(req.body)));
+// Business settings (placeholders until the real values are decided).
+const config = () => ({
+  chinaDepositPercent: Number(process.env.CHINA_DEPOSIT_PERCENT ?? 50),
+  deliveryFee: Number(process.env.DELIVERY_FEE ?? 0),
+});
+r.get("/config", (_req, res) => res.json(config()));
+
+// Prices and totals are always recomputed here, never trusted from the client.
+r.post("/orders", async (req, res) => {
+  const { items, customerName, phone, delivery, address, payment, paymentProof } = req.body;
+  if (!Array.isArray(items) || !items.length || !customerName || !phone || !["lumicash", "bank"].includes(payment))
+    return res.status(400).json({ error: "Invalid order" });
+  if (delivery === "delivery" && !address) return res.status(400).json({ error: "Delivery address required" });
+
+  const parts = await Part.find({ _id: { $in: items.map((i: { partId: string }) => i.partId) } });
+  const lines = [];
+  for (const i of items) {
+    const p = parts.find((x) => String(x._id) === i.partId);
+    const qty = Number(i.qty);
+    if (!p || !Number.isInteger(qty) || qty < 1 || qty > 99) return res.status(400).json({ error: "Invalid item" });
+    lines.push({ partId: String(p._id), name: p.name ?? "", qty, price: p.price ?? 0, source: (p.source ?? "shop") as "shop" | "china" });
+  }
+  const cfg = config();
+  const t = computeTotals(lines, cfg.chinaDepositPercent, cfg.deliveryFee, delivery === "delivery");
+  const order = await Order.create({
+    orderNo: await nextOrderNo(), items: lines, customerName, phone,
+    delivery: delivery === "delivery" ? "delivery" : "pickup", address, payment, paymentProof,
+    subtotal: t.shopSubtotal + t.chinaSubtotal, deposit: t.deposit, deliveryFee: t.deliveryFee, total: t.dueNow,
+    status: "pending",
+  });
+  res.status(201).json({ orderNo: order.orderNo, total: order.total });
+});
 r.get("/orders", admin, async (_req, res) => res.json(await Order.find().sort({ createdAt: -1 })));
 
 r.post("/china-requests", async (req, res) => res.status(201).json(await ChinaRequest.create(req.body)));

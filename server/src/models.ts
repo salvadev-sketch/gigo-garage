@@ -16,10 +16,12 @@ export const Booking = model("Booking", new Schema({
 }, { timestamps: true }));
 
 export const Order = model("Order", new Schema({
-  items: [{ partId: String, qty: Number, price: Number }],
+  orderNo: { type: String, required: true, unique: true },
+  items: [{ partId: String, name: String, qty: Number, price: Number, source: String }],
   customerName: String, phone: String,
   delivery: { type: String, enum: ["pickup", "delivery"] }, address: String,
-  payment: { type: String, enum: ["lumicash", "bank"] }, paymentProof: String, total: Number,
+  payment: { type: String, enum: ["lumicash", "bank"] }, paymentProof: String,
+  subtotal: Number, deposit: Number, deliveryFee: Number, total: Number,
   status: { type: String, enum: ["pending", "paid", "done"], default: "pending" },
 }, { timestamps: true }));
 
@@ -31,8 +33,11 @@ export const ChinaRequest = model("ChinaRequest", new Schema({
 
 const Counter = model("Counter", new Schema({ _id: String, seq: { type: Number, default: 0 } }));
 
-/** Next Car ID, e.g. GA-0001. Atomic, so two bookings never share an ID. */
-export async function nextCarId(): Promise<string> {
-  const c = await Counter.findByIdAndUpdate("carId", { $inc: { seq: 1 } }, { new: true, upsert: true });
-  return `GA-${String(c.seq).padStart(4, "0")}`;
+async function nextSeq(id: string, prefix: string): Promise<string> {
+  const c = await Counter.findByIdAndUpdate(id, { $inc: { seq: 1 } }, { new: true, upsert: true });
+  return `${prefix}${String(c.seq).padStart(4, "0")}`;
 }
+/** Next Car ID, e.g. GA-0001. Atomic, so two bookings never share an ID. */
+export const nextCarId = () => nextSeq("carId", "GA-");
+/** Next order number, e.g. OR-0001. */
+export const nextOrderNo = () => nextSeq("orderNo", "OR-");
