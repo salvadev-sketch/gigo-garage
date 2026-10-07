@@ -7,6 +7,7 @@ export const Part = model("Part", new Schema({
 }, { timestamps: true }));
 
 export const Booking = model("Booking", new Schema({
+  carId: { type: String, required: true, unique: true },
   customerName: { type: String, required: true }, phone: { type: String, required: true },
   make: String, model: String, year: Number, chassisNo: String,
   service: { type: String, required: true }, date: String, time: String, notes: String,
@@ -26,3 +27,11 @@ export const ChinaRequest = model("ChinaRequest", new Schema({
   quote: Number, deposit: Number,
   status: { type: String, enum: ["requested", "quoted", "ordered", "shipped", "arrived", "ready"], default: "requested" },
 }, { timestamps: true }));
+
+const Counter = model("Counter", new Schema({ _id: String, seq: { type: Number, default: 0 } }));
+
+/** Next Car ID, e.g. GA-0001. Atomic, so two bookings never share an ID. */
+export async function nextCarId(): Promise<string> {
+  const c = await Counter.findByIdAndUpdate("carId", { $inc: { seq: 1 } }, { new: true, upsert: true });
+  return `GA-${String(c.seq).padStart(4, "0")}`;
+}

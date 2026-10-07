@@ -1,6 +1,6 @@
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
 import { api } from "../api";
-import type { Booking } from "../../../shared/types";
+import type { Booking, BookingStatus, QueueItem } from "../../../shared/types";
 
 const icon = { width: 32, height: 32, viewBox: "0 0 24 24", fill: "none", stroke: "#0B6B4F", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
@@ -13,6 +13,14 @@ const services: { name: string; text: string; svg: ReactNode }[] = [
   { name: "Charging system", text: "Charging port, onboard charger and wiring", svg: <path d="M13 3L5 14h6l-1 7 8-11h-6z" /> },
 ];
 
+const statusLabel: Record<string, { text: string; cls: string }> = {
+  pending: { text: "Waiting", cls: "wait" },
+  confirmed: { text: "Confirmed", cls: "conf" },
+  in_progress: { text: "In progress", cls: "prog" },
+};
+const labelFor = (s: BookingStatus) => statusLabel[s] ?? { text: s === "done" ? "Done" : "Cancelled", cls: "wait" };
+const ID_KEY = "gigo-car-id";
+
 const makes = ["Toyota", "Nissan", "Honda", "Mitsubishi", "Suzuki", "Subaru", "Other"];
 const thisYear = new Date().getFullYear();
 const years = Array.from({ length: thisYear - 1999 }, (_, i) => thisYear - i);
@@ -23,6 +31,16 @@ const empty: Form = { customerName: "", phone: "", make: "", model: "", year: ""
 export default function Garage() {
   const [form, setForm] = useState<Form>(empty);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [result, setResult] = useState<{ carId: string; position: number } | null>(null);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [myId, setMyId] = useState<string>(() => { try { return localStorage.getItem(ID_KEY) ?? ""; } catch { return ""; } });
+  const [trackId, setTrackId] = useState("");
+  const [tracked, setTracked] = useState<QueueItem | "none" | null>(null);
+
+  const loadQueue = useCallback(() => {
+    api<QueueItem[]>("/queue").then(setQueue).catch(() => setQueue([]));
+  }, []);
+  useEffect(() => { loadQueue(); }, [loadQueue]);
   const set = (k: keyof Form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const submit = async (e: FormEvent) => {
@@ -30,12 +48,21 @@ export default function Garage() {
     setStatus("sending");
     try {
       const body: Partial<Booking> = { ...form, year: form.year ? Number(form.year) : undefined };
-      await api("/bookings", { method: "POST", body: JSON.stringify(body) });
+      const res = await api<{ carId: string; position: number }>("/bookings", { method: "POST", body: JSON.stringify(body) });
+      setResult(res);
+      setMyId(res.carId);
+      try { localStorage.setItem(ID_KEY, res.carId); } catch { /* storage unavailable */ }
       setForm(empty);
       setStatus("done");
+      loadQueue();
     } catch {
       setStatus("error");
     }
+  };
+
+  const track = async (e: FormEvent) => {
+    e.preventDefault();
+    try { setTracked(await api<QueueItem>(`/track/${encodeURIComponent(trackId.trim())}`)); } catch { setTracked("none"); }
   };
 
   return (
@@ -97,9 +124,48 @@ export default function Garage() {
           <button className="btn btn-primary" type="submit" disabled={status === "sending"}>
             {status === "sending" ? "Sending..." : "Request booking"}
           </button>
-          {status === "done" && <p className="msg-ok" role="status">Booking received. We will confirm by SMS or WhatsApp.</p>}
+          {status === "done" && result && (
+            <div className="msg-ok" role="status">
+              Booking received. Your Car ID:
+              <span className="carid">{result.carId}</span>
+              Position in the waiting list: {result.position}. Keep this ID. We confirm by SMS or WhatsApp.
+            </div>
+          )}
           {status === "error" && <p className="msg-err" role="alert">Something went wrong. Please try again.</p>}
         </form>
+      </section>
+
+      <section id="queue" className="section">
+        <div className="title"><h2>Cars in the garage</h2><div /></div>
+        <form className="track" onSubmit={track}>
+          <label><span style={{ position: "absolute", left: -9999 }}>Car ID</span>
+            <input placeholder="Check your Car ID, e.g. GA-0001" value={trackId} onChange={(e) => setTrackId(e.target.value)} />
+          </label>
+          <button className="btn btn-light" type="submit">Check</button>
+        </form>
+        {tracked === "none" && <p className="msg-err" role="alert">Car ID not found.</p>}
+        {tracked && tracked !== "none" && (
+          <p className="msg-ok" role="status">
+            {tracked.carId}: {labelFor(tracked.status).text}{tracked.position ? ` · position ${tracked.position} in the waiting list` : ""}
+          </p>
+        )}
+        <div className="qwrap">
+          <table className="qtable">
+            <thead><tr><th>#</th><th>Car ID</th><th>Car</th><th>Service</th><th>Status</th></tr></thead>
+            <tbody>
+              {queue.length === 0 && <tr><td colSpan={5} className="empty">No cars waiting right now.</td></tr>}
+              {queue.map((q) => (
+                <tr key={q.carId} className={q.carId === myId ? "me" : ""}>
+                  <td>{q.position}</td>
+                  <td><b>{q.carId}</b>{q.carId === myId ? " (your car)" : ""}</td>
+                  <td>{[q.make, q.model, q.year].filter(Boolean).join(" ")}</td>
+                  <td>{q.service}</td>
+                  <td><span className={`badge ${labelFor(q.status).cls}`}>{labelFor(q.status).text}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
   );

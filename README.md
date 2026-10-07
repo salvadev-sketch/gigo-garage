@@ -39,7 +39,9 @@ cd client && npm install && npm run dev
 | Method | Path | Purpose |
 |---|---|---|
 | GET | /api/parts?source=shop\|china | List parts |
-| POST | /api/bookings | Create booking |
+| POST | /api/bookings | Create booking, returns Car ID (GA-0001) and waiting list position |
+| GET | /api/queue | Public waiting list of cars in the garage |
+| GET | /api/track/:carId | Public status and position by Car ID |
 | GET/PATCH | /api/bookings (admin) | List / update status |
 | POST | /api/orders | Create order |
 | POST | /api/china-requests | Request a part from China |

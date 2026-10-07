@@ -9,7 +9,7 @@ export interface Part {
   price: number; stock: number; source: PartSource; leadTimeWeeks?: number;
 }
 export interface Booking {
-  _id: string; customerName: string; phone: string;
+  _id: string; carId: string; customerName: string; phone: string;
   make: string; model: string; year: number; chassisNo?: string;
   service: string; date: string; time: string; notes?: string; status: BookingStatus;
 }
@@ -22,4 +22,10 @@ export interface Order {
 export interface ChinaRequest {
   _id: string; partNo?: string; photoUrl?: string; vehicle: string;
   phone: string; quote?: number; deposit?: number; status: ChinaStatus;
+}
+
+/** Public view of a car in the garage waiting list (no personal data). */
+export interface QueueItem {
+  carId: string; make?: string; model?: string; year?: number;
+  service: string; status: BookingStatus; position: number | null;
 }
