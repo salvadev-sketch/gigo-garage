@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap");
+:root{--ink:#0F1B1E;--muted:#5B6B6E;--surface:#F3F5F4;--line:#C5D2D0;--accent:#0B6B4F;--tint:#E3F3EC}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Space Grotesk",sans-serif;color:var(--ink);background:#fff}
+a{color:inherit;text-decoration:none}
+.container{max-width:1240px;margin:0 auto;padding:0 24px}
+.btn{display:inline-block;border-radius:999px;padding:14px 28px;font:inherit;font-weight:500;border:0;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-light{background:var(--surface);color:var(--ink)}
+.btn-white{background:#fff;color:var(--ink)}
+.btn-outline{background:#fff;color:var(--ink);border:1px solid var(--line);padding:8px 18px;font-size:14px}
+.site-header{border-bottom:1px solid #E7ECEB}
+.site-header .container{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-top:20px;padding-bottom:20px}
+.logo{font-weight:700;font-size:22px;letter-spacing:.5px}
+.nav{display:flex;flex-wrap:wrap;align-items:center;gap:28px;color:#3C4A4D}
+.nav a.active{color:var(--ink);font-weight:700}
+.nav .seller{border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-size:14px}
+.tools{display:flex;align-items:center;gap:24px;font-size:15px}
+.tools a{display:flex;align-items:center;gap:8px}
+.hero{background:var(--surface);border-radius:28px;padding:56px;display:flex;flex-wrap:wrap;align-items:center;gap:32px;margin-top:40px}
+.hero-text{flex:1 1 420px}
+.hero h1{font-size:48px;line-height:1.1;margin:0 0 28px;max-width:520px}
+.eyebrow{color:var(--accent);font-weight:500;margin:0 0 16px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:24px}
+.ph{background:#E7ECEB;border-radius:16px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.hero .ph{flex:1 1 360px;height:320px;border-radius:20px}
+.dots{display:flex;justify-content:center;gap:10px;margin:24px 0 80px}
+.dots span{width:8px;height:8px;border-radius:8px;background:var(--line)}
+.dots span.on{width:28px;background:var(--accent)}
+.section{padding-bottom:80px}
+.title{text-align:center;margin-bottom:40px}
+.title h2{margin:0;font-size:34px}
+.title div{width:56px;height:4px;background:var(--accent);border-radius:4px;margin:14px auto 0}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.product{display:flex;flex-direction:column;gap:10px}
+.product .ph{height:220px;background:var(--surface)}
+.product small,.muted{color:var(--muted)}
+.product .foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.more{text-align:center;margin-top:40px}
+.feature{background:var(--surface);border-radius:20px;padding:32px;min-height:380px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px}
+.feature h3{margin:0;font-size:26px}
+.feature p{margin:0;color:var(--muted);line-height:1.5}
+.feature .btn{align-self:flex-start;padding:10px 22px;font-size:14px;margin-top:6px}
+.banner{background:var(--accent);color:#fff;border-radius:28px;padding:56px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:32px}
+.banner h2{margin:0 0 12px;font-size:38px;line-height:1.15}
+.banner p{margin:0 0 28px;font-size:17px;line-height:1.5;max-width:460px}
+.banner .ph{flex:1 1 280px;height:240px;background:rgba(255,255,255,.18);color:#fff}
+.subscribe{text-align:center;padding-bottom:96px}
+.subscribe h2{margin:0 0 12px;font-size:34px}
+.subscribe form{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:28px}
+.subscribe input{flex:0 1 420px;padding:16px 20px;border:1px solid var(--line);border-radius:999px;font:inherit}
+.site-footer{background:var(--surface);padding:56px 0 32px;color:var(--muted);font-size:15px}
+.site-footer .cols{display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px}
+.site-footer b{color:var(--ink)}
+.site-footer p{margin:12px 0 0;line-height:1.9}
+.copy{margin-top:40px;padding-top:20px;border-top:1px solid #D8E2E0;font-size:14px}
