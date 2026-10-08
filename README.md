@@ -93,5 +93,5 @@ Users must sign in again after a role change.
 ## Roadmap
 1. Seed parts and vehicle catalogue
 2. Automatic Lumicash / bank payment confirmation (needs a provider API; staff confirm by hand today)
-4. SMS/WhatsApp notifications
-5. Deploy (Vercel + Render)
+3. SMS/WhatsApp notifications
+4. Deploy (Vercel + Render)
