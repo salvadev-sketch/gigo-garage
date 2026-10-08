@@ -18,9 +18,17 @@ export interface Order {
   _id: string; orderNo: string; items: OrderItem[]; customerName: string; phone: string;
   delivery: "pickup" | "delivery"; address?: string;
   payment: PaymentMethod; /** Lumicash/bank transaction reference entered by the customer */ paymentProof?: string;
-  subtotal: number; deposit: number; deliveryFee: number; total: number; status: "pending" | "paid" | "done";
+  subtotal: number; deposit: number; deliveryFee: number; total: number; status: OrderStatus;
+  /** Set when staff confirm the payment */ paidAt?: string; confirmedBy?: string;
 }
-export interface ShopConfig { chinaDepositPercent: number; deliveryFee: number }
+export type OrderStatus = "pending" | "paid" | "done" | "cancelled";
+/** Public view of an order (no personal data). */
+export interface OrderTrack { orderNo: string; status: OrderStatus; total: number; delivery: "pickup" | "delivery"; payment: PaymentMethod }
+/** Business settings and where customers send payments / pick up parts (set in server/.env). */
+export interface ShopConfig {
+  chinaDepositPercent: number; deliveryFee: number;
+  lumicashNumber: string; bankName: string; bankAccount: string; pickupAddress: string;
+}
 export interface ChinaRequest {
   _id: string; requestNo: string; partNo?: string; photoUrl?: string; vehicle: string; notes?: string;
   phone: string; quote?: number; deposit?: number; status: ChinaStatus;

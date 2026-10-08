@@ -17,6 +17,12 @@ r.get("/parts", validateQuery(partsQuery), async (req, res) => {
   res.json(await Part.find(filter).limit(100));
 });
 
+r.get("/parts/:id", async (req, res) => {
+  const p = await Part.findById(req.params.id);
+  if (!p) return res.status(404).json({ error: "Part not found" });
+  res.json(p);
+});
+
 const fields = (b: Record<string, unknown>) => {
   const { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks } = b;
   return { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks };

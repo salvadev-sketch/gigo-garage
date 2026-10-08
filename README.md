@@ -48,6 +48,7 @@ cd client && npm install && npm run dev
 - `CORS_ORIGINS` allowed browser origins, comma separated (default `http://localhost:5173`; in production set your Vercel URL)
 - `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
+- `LUMICASH_NUMBER`, `BANK_NAME`, `BANK_ACCOUNT`, `PICKUP_ADDRESS` shown at checkout (placeholders until set)
 
 ## Deploy notes
 - Client (Vercel): set `VITE_API_URL` to the Render server URL, plus the `VITE_FIREBASE_*` values.
@@ -80,16 +81,17 @@ Users must sign in again after a role change.
 | GET | /api/bookings (garage staff) | List all bookings |
 | PATCH | /api/bookings/:id (garage staff) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
 | GET | /api/config | Deposit percent and delivery fee |
-| POST | /api/orders | Create order (server recomputes totals), returns order number |
+| GET | /api/parts/:id | One part (product page) |
+| POST | /api/orders | Create order. Server recomputes totals and reserves stock (409 if not enough) |
+| GET | /api/orders/track/:orderNo | Public order status (no personal data) |
 | POST | /api/china-requests | Customer requests a part from China, returns request number (CN-0001) |
 | GET | /api/china-requests/track/:requestNo | Public status, quote and deposit |
 | GET/PATCH | /api/china-requests (shop staff) | List / add quote and update status |
-| GET/PATCH | /api/orders (shop staff) | List orders / confirm payment, mark done |
+| GET/PATCH | /api/orders (shop staff) | List orders / confirm payment (records who and when; a payment reference can be used once), mark done, cancel (stock goes back) |
 | POST/PATCH/DELETE | /api/parts (shop staff) | Manage the parts catalogue |
 
 ## Roadmap
 1. Seed parts and vehicle catalogue
-2. Product detail page
-3. Lumicash and bank payment confirmation
+2. Automatic Lumicash / bank payment confirmation (needs a provider API; staff confirm by hand today)
 4. SMS/WhatsApp notifications
 5. Deploy (Vercel + Render)

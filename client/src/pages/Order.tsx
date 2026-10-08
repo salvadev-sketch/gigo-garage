@@ -15,7 +15,8 @@ export default function Order() {
         We confirm your payment by SMS or WhatsApp. For parts from China, we send you the final quote first.
       </p>
       <div className="row" style={{ justifyContent: "center", gap: 12 }}>
-        <Link to="/shop" className="btn btn-primary">Continue shopping</Link>
+        {state?.orderNo && <Link to={`/track-order?no=${state.orderNo}`} className="btn btn-primary">Track this order</Link>}
+        <Link to="/shop" className="btn btn-light">Continue shopping</Link>
         <Link to="/" className="btn btn-light">Back to home</Link>
       </div>
     </main>

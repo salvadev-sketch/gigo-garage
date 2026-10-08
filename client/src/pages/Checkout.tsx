@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../api";
+import { api, ApiError } from "../api";
 import { useCart } from "../components/CartContext";
 import { useConfig } from "../config";
 import { bif } from "../format";
@@ -17,6 +17,7 @@ export default function Checkout() {
   const [delivery, setDelivery] = useState<Delivery>("pickup");
   const [payment, setPayment] = useState<Payment>("lumicash");
   const [state, setState] = useState<"idle" | "sending" | "error">("idle");
+  const [errMsg, setErrMsg] = useState("");
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((p) => ({ ...p, [k]: e.target.value }));
 
   const t = computeTotals(items.map((i) => ({ price: i.part.price, qty: i.qty, source: i.part.source })), cfg.chinaDepositPercent, cfg.deliveryFee, delivery === "delivery");
@@ -39,7 +40,8 @@ export default function Checkout() {
       });
       clear();
       navigate("/order", { state: res });
-    } catch {
+    } catch (err) {
+      setErrMsg(err instanceof ApiError && err.status === 409 ? err.message : "");
       setState("error");
     }
   };
@@ -59,7 +61,7 @@ export default function Checkout() {
 
           <div className="card-gray">
             <h2>Delivery</h2>
-            <label className="radio"><input type="radio" name="d" checked={delivery === "pickup"} onChange={() => setDelivery("pickup")} /><span><b>Pick up at the garage</b><br /><span className="muted" style={{ fontSize: 14 }}>[YOUR ADDRESS]</span></span></label>
+            <label className="radio"><input type="radio" name="d" checked={delivery === "pickup"} onChange={() => setDelivery("pickup")} /><span><b>Pick up at the garage</b><br /><span className="muted" style={{ fontSize: 14 }}>{cfg.pickupAddress}</span></span></label>
             <label className="radio"><input type="radio" name="d" checked={delivery === "delivery"} onChange={() => setDelivery("delivery")} /><span><b>Delivery</b><br /><span className="muted" style={{ fontSize: 14 }}>We deliver to your address</span></span></label>
             {delivery === "delivery" && (
               <>
@@ -74,8 +76,8 @@ export default function Checkout() {
 
           <div className="card-gray">
             <h2>Payment</h2>
-            <label className="radio"><input type="radio" name="p" checked={payment === "lumicash"} onChange={() => setPayment("lumicash")} /><span><b>Lumicash</b><br /><span className="muted" style={{ fontSize: 14 }}>Send {bif(t.dueNow)} to [LUMICASH NUMBER]</span></span></label>
-            <label className="radio"><input type="radio" name="p" checked={payment === "bank"} onChange={() => setPayment("bank")} /><span><b>Bank transfer</b><br /><span className="muted" style={{ fontSize: 14 }}>[BANK NAME] · [ACCOUNT NUMBER]</span></span></label>
+            <label className="radio"><input type="radio" name="p" checked={payment === "lumicash"} onChange={() => setPayment("lumicash")} /><span><b>Lumicash</b><br /><span className="muted" style={{ fontSize: 14 }}>Send {bif(t.dueNow)} to {cfg.lumicashNumber}</span></span></label>
+            <label className="radio"><input type="radio" name="p" checked={payment === "bank"} onChange={() => setPayment("bank")} /><span><b>Bank transfer</b><br /><span className="muted" style={{ fontSize: 14 }}>{cfg.bankName} · {cfg.bankAccount}</span></span></label>
             <label className="field">Transaction reference (optional)
               <input value={f.paymentProof} onChange={set("paymentProof")} placeholder="Reference from your Lumicash or bank receipt" />
             </label>
@@ -94,7 +96,7 @@ export default function Checkout() {
           <div className="sum total"><span>Total due now</span><span>{bif(t.dueNow)}</span></div>
           <button className="btn btn-primary" type="submit" disabled={state === "sending"}>{state === "sending" ? "Placing order..." : "Place order"}</button>
           <Link to="/cart" className="btn btn-white" style={{ textAlign: "center", border: "1px solid var(--line)" }}>Back to cart</Link>
-          {state === "error" && <p className="msg-err" role="alert">Could not place the order. Please check your details and try again.</p>}
+          {state === "error" && <p className="msg-err" role="alert">{errMsg ? `${errMsg}. Please update your cart.` : "Could not place the order. Please check your details and try again."}</p>}
         </aside>
       </form>
     </main>

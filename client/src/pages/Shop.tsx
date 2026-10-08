@@ -9,18 +9,19 @@ type Sort = "relevance" | "asc" | "desc";
 function PartCard({ part }: { part: Part }) {
   const { add } = useCart();
   const china = part.source === "china";
+  const out = !china && part.stock < 1;
   return (
     <div className="part">
       <div className="ph">[PHOTO]</div>
       <span className={`badge ${china ? "china" : "stock"}`}>
-        {china ? `From China${part.leadTimeWeeks ? ` · ${part.leadTimeWeeks} weeks` : ""}` : "In stock"}
+        {china ? `From China${part.leadTimeWeeks ? ` · ${part.leadTimeWeeks} weeks` : ""}` : out ? "Out of stock" : "In stock"}
       </span>
-      <b style={{ fontSize: 18 }}>{part.name}</b>
+      <Link to={`/shop/${part._id}`} style={{ fontSize: 18, fontWeight: 700 }}>{part.name}</Link>
       <span className="muted" style={{ fontSize: 14 }}>Fits: {part.make} {part.model} · {part.partNo}</span>
       <div className="foot">
         <b style={{ fontSize: 18 }}>{part.price.toLocaleString()} BIF</b>
-        <button className={`btn btn-sm ${china ? "btn-green-outline" : "btn-primary"}`} onClick={() => add(part)}>
-          {china ? "Request quote" : "Add to cart"}
+        <button className={`btn btn-sm ${china ? "btn-green-outline" : "btn-primary"}`} disabled={out} onClick={() => add(part)}>
+          {china ? "Request quote" : out ? "Sold out" : "Add to cart"}
         </button>
       </div>
     </div>

@@ -7,5 +7,6 @@ export const Order = model("Order", new Schema({
   delivery: { type: String, enum: ["pickup", "delivery"] }, address: String,
   payment: { type: String, enum: ["lumicash", "bank"] }, paymentProof: String,
   subtotal: Number, deposit: Number, deliveryFee: Number, total: Number,
-  status: { type: String, enum: ["pending", "paid", "done"], default: "pending" },
+  status: { type: String, enum: ["pending", "paid", "done", "cancelled"], default: "pending" },
+  paidAt: Date, confirmedBy: String,
 }, { timestamps: true }));

@@ -13,7 +13,7 @@ const NEED_ONE = "Nothing to update";
 
 export const BOOKING_STATUS = ["pending", "confirmed", "in_progress", "done", "cancelled"] as const;
 export const CHINA_STATUS = ["requested", "quoted", "ordered", "shipped", "arrived", "ready"] as const;
-export const ORDER_STATUS = ["pending", "paid", "done"] as const;
+export const ORDER_STATUS = ["pending", "paid", "done", "cancelled"] as const;
 export const SOURCES = ["shop", "china"] as const;
 
 export const bookingCreate = z.object({
@@ -31,7 +31,9 @@ export const orderCreate = z.object({
   items: z.array(z.object({ partId: objectId, qty: z.number().int().min(1).max(99) })).min(1).max(50),
   customerName: name, phone,
   delivery: z.enum(["pickup", "delivery"]), address: opt(300),
-  payment: z.enum(["lumicash", "bank"]), paymentProof: opt(100),
+  payment: z.enum(["lumicash", "bank"]),
+  // Normalised so the same reference typed in a different case or spacing is still recognised as a duplicate.
+  paymentProof: z.string().trim().max(100).optional().transform((v) => v?.replace(/\s+/g, " ").toUpperCase() || undefined),
 }).refine((o) => o.delivery !== "delivery" || !!o.address, { message: "Delivery address required", path: ["address"] });
 
 export const orderPatch = z.object({ status: z.enum(ORDER_STATUS) });
