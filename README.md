@@ -45,8 +45,14 @@ cd client && npm install && npm run dev
 - `MONGODB_URI` MongoDB connection string
 - `FIREBASE_SERVICE_ACCOUNT` Firebase service account JSON on one line (or set `GOOGLE_APPLICATION_CREDENTIALS` to the key file path)
 - `PORT` default 4000
+- `CORS_ORIGINS` allowed browser origins, comma separated (default `http://localhost:5173`; in production set your Vercel URL)
 - `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
+
+## Deploy notes
+- Client (Vercel): set `VITE_API_URL` to the Render server URL, plus the `VITE_FIREBASE_*` values.
+- Server (Render): set `MONGODB_URI`, `FIREBASE_SERVICE_ACCOUNT`, `CORS_ORIGINS`. Add the Vercel domain to Firebase > Authentication > Settings > Authorized domains.
+- Rate limits: 300 requests / 15 min per IP on the API, 20 / hour on public create routes (bookings, orders, China requests).
 
 ## Staff auth (Firebase + RBAC)
 Staff sign in with Firebase Auth (email and password). The role lives in a Firebase custom claim `role`:
