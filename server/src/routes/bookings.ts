@@ -2,10 +2,13 @@ import { Router } from "express";
 import { Booking, nextCarId } from "../models/index.js";
 import { garageAdmin } from "../middleware/admin.js";
 import { activeBookings, CLOSED } from "../services/queue.js";
+import { checkId, validateBody } from "../middleware/validate.js";
+import { bookingCreate, bookingPatch } from "../schemas.js";
 
 const r = Router();
+r.param("id", checkId);
 
-r.post("/bookings", async (req, res) => {
+r.post("/bookings", validateBody(bookingCreate), async (req, res) => {
   const { customerName, phone, make, model, year, chassisNo, service, date, time, notes } = req.body;
   const b = await Booking.create({
     customerName, phone, make, model, year, chassisNo, service, date, time, notes,
@@ -19,7 +22,7 @@ r.get("/bookings", garageAdmin, async (_req, res) => res.json(await Booking.find
 
 // Setting status to "done" (car repaired and working) or "cancelled" invalidates the
 // Car ID and removes the car from the public waiting list.
-r.patch("/bookings/:id", garageAdmin, async (req, res) => {
+r.patch("/bookings/:id", garageAdmin, validateBody(bookingPatch), async (req, res) => {
   const { status, notes } = req.body;
   const update: Record<string, unknown> = {};
   if (notes !== undefined) update.notes = notes;

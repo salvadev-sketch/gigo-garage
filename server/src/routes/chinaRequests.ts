@@ -1,13 +1,15 @@
 import { Router } from "express";
 import { ChinaRequest, nextRequestNo } from "../models/index.js";
 import { shopAdmin } from "../middleware/admin.js";
+import { checkId, validateBody } from "../middleware/validate.js";
+import { chinaCreate, chinaPatch } from "../schemas.js";
 
 const r = Router();
+r.param("id", checkId);
 
 // Customer asks for a part that is not in the catalogue.
-r.post("/china-requests", async (req, res) => {
+r.post("/china-requests", validateBody(chinaCreate), async (req, res) => {
   const { partNo, vehicle, phone, notes } = req.body;
-  if (!phone || (!partNo && !notes)) return res.status(400).json({ error: "Phone and a part number or description are required" });
   const c = await ChinaRequest.create({ requestNo: await nextRequestNo(), partNo, vehicle, phone, notes, status: "requested" });
   res.status(201).json({ requestNo: c.requestNo });
 });
@@ -21,7 +23,7 @@ r.get("/china-requests/track/:requestNo", async (req, res) => {
 
 r.get("/china-requests", shopAdmin, async (_req, res) => res.json(await ChinaRequest.find().sort({ createdAt: -1 })));
 
-r.patch("/china-requests/:id", shopAdmin, async (req, res) => {
+r.patch("/china-requests/:id", shopAdmin, validateBody(chinaPatch), async (req, res) => {
   const { quote, deposit, status } = req.body;
   const update = Object.fromEntries(Object.entries({ quote, deposit, status }).filter(([, v]) => v !== undefined));
   const c = await ChinaRequest.findByIdAndUpdate(req.params.id, update, { new: true });

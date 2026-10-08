@@ -1,10 +1,13 @@
 import { Router } from "express";
 import { Part } from "../models/index.js";
 import { shopAdmin } from "../middleware/admin.js";
+import { checkId, validateBody, validateQuery } from "../middleware/validate.js";
+import { partCreate, partPatch, partsQuery } from "../schemas.js";
 
 const r = Router();
+r.param("id", checkId);
 
-r.get("/parts", async (req, res) => {
+r.get("/parts", validateQuery(partsQuery), async (req, res) => {
   const { source, make, model, category } = req.query;
   const filter: Record<string, unknown> = {};
   if (source) filter.source = source;
@@ -19,8 +22,8 @@ const fields = (b: Record<string, unknown>) => {
   return { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks };
 };
 
-r.post("/parts", shopAdmin, async (req, res) => res.status(201).json(await Part.create(fields(req.body))));
-r.patch("/parts/:id", shopAdmin, async (req, res) => {
+r.post("/parts", shopAdmin, validateBody(partCreate), async (req, res) => res.status(201).json(await Part.create(fields(req.body))));
+r.patch("/parts/:id", shopAdmin, validateBody(partPatch), async (req, res) => {
   const update = Object.fromEntries(Object.entries(fields(req.body)).filter(([, v]) => v !== undefined));
   const p = await Part.findByIdAndUpdate(req.params.id, update, { new: true });
   if (!p) return res.status(404).json({ error: "Part not found" });
