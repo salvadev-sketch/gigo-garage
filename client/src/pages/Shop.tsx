@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useCart } from "../components/CartContext";
+import PartImage from "../components/PartImage";
 import type { Part } from "../../../shared/types";
 
 type Sort = "relevance" | "asc" | "desc";
@@ -12,7 +13,7 @@ function PartCard({ part }: { part: Part }) {
   const out = !china && part.stock < 1;
   return (
     <div className="part">
-      <div className="ph">[PHOTO]</div>
+      <PartImage part={part} width={400} />
       <span className={`badge ${china ? "china" : "stock"}`}>
         {china ? `From China${part.leadTimeWeeks ? ` · ${part.leadTimeWeeks} weeks` : ""}` : out ? "Out of stock" : "In stock"}
       </span>

@@ -48,7 +48,14 @@ cd client && npm install && npm run dev
 - `CORS_ORIGINS` allowed browser origins, comma separated (default `http://localhost:5173`; in production set your Vercel URL)
 - `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` part photos (secret stays on the server)
 - `LUMICASH_NUMBER`, `BANK_NAME`, `BANK_ACCOUNT`, `PICKUP_ADDRESS` shown at checkout (placeholders until set)
+
+## Part photos (Cloudinary)
+1. Create a free Cloudinary account and copy the cloud name, API key and API secret from its dashboard into `server/.env` (and Render).
+2. In the shop dashboard, add a photo when adding a part, or use "Add photo / Change photo / Remove" on any row.
+Photos go from the browser straight to Cloudinary (JPG, PNG or WebP, max 5 MB), signed by the server, and are shown resized and optimised. Only images from your own Cloudinary account are accepted. Photos are stored in the `gigo-garage/parts` folder; removing a photo or deleting a part does not delete the file from Cloudinary.
+The CSV import also accepts an optional `imageUrl` column with a Cloudinary URL.
 
 ## Load your real parts
 Fill `server/data/parts.template.csv` (one part per row; years as `2010-2013` or `2010;2011`; source `shop` or `china`), then:
@@ -89,6 +96,7 @@ Users must sign in again after a role change.
 | GET | /api/track/:carId | Public status and position by Car ID |
 | GET | /api/admin/shop/ping, /api/admin/garage/ping | Check dashboard access (Bearer token) |
 | POST | /api/admin/roles (owner) | Set a staff role by email |
+| POST | /api/admin/uploads/sign (shop staff) | Signature for a direct photo upload to Cloudinary |
 | GET | /api/bookings (garage staff) | List all bookings |
 | PATCH | /api/bookings/:id (garage staff) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
 | GET | /api/config | Deposit percent and delivery fee |

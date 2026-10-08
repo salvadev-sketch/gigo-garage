@@ -34,6 +34,7 @@ export function parseParts(csv: string): { rows: PartRow[]; errors: CsvError[] }
     const parsed = partCreate.safeParse({
       name: r.name, category: r.category, partNo: r.partNo, make: r.make, model: r.model,
       years: parseYears(r.years), price: num(r.price), stock: num(r.stock), source: r.source || undefined, leadTimeWeeks: num(r.leadTimeWeeks),
+      imageUrl: r.imageUrl || undefined, // optional column
     });
     if (!parsed.success) {
       return parsed.error.issues.forEach((x) => errors.push({ line, message: `${x.path.join(".") || "row"}: ${x.message}` }));

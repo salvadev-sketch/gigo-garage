@@ -24,13 +24,14 @@ r.get("/parts/:id", async (req, res) => {
 });
 
 const fields = (b: Record<string, unknown>) => {
-  const { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks } = b;
-  return { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks };
+  const { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks, imageUrl } = b;
+  return { name, category, partNo, make, model, years, price, stock, source, leadTimeWeeks, imageUrl };
 };
 
 r.post("/parts", shopAdmin, validateBody(partCreate), async (req, res) => res.status(201).json(await Part.create(fields(req.body))));
 r.patch("/parts/:id", shopAdmin, validateBody(partPatch), async (req, res) => {
-  const update = Object.fromEntries(Object.entries(fields(req.body)).filter(([, v]) => v !== undefined));
+  const update: Record<string, unknown> = Object.fromEntries(Object.entries(fields(req.body)).filter(([, v]) => v !== undefined));
+  if (update.imageUrl === "") { delete update.imageUrl; update.$unset = { imageUrl: 1 }; } // remove the photo
   const p = await Part.findByIdAndUpdate(req.params.id, update, { new: true });
   if (!p) return res.status(404).json({ error: "Part not found" });
   res.json(p);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isOurImage } from "./services/cloudinary.js";
 
 // Optional text: trimmed, length-limited, and "" (an empty form field) counts as not given.
 const opt = (max: number) => z.string().trim().max(max).optional().transform((v) => v || undefined);
@@ -44,6 +45,7 @@ export const chinaCreate = z.object({ partNo: opt(50), vehicle: opt(100), phone,
 export const chinaPatch = z.object({ quote: money.optional(), deposit: money.optional(), status: z.enum(CHINA_STATUS).optional() })
   .refine(atLeastOne, NEED_ONE);
 
+const partImage = z.string().max(500).refine(isOurImage, "Photo must be uploaded to our Cloudinary account");
 const partFields = {
   name: z.string().trim().min(1).max(100), category: z.string().trim().min(1).max(50), partNo: z.string().trim().min(1).max(50),
   make: z.string().trim().max(50), model: z.string().trim().max(50),
@@ -54,9 +56,10 @@ const partFields = {
 export const partCreate = z.object({
   ...partFields, make: partFields.make.default(""), model: partFields.model.default(""),
   years: partFields.years.default([]), stock: partFields.stock.default(0), source: partFields.source.default("shop"),
-  leadTimeWeeks: partFields.leadTimeWeeks.optional(),
+  leadTimeWeeks: partFields.leadTimeWeeks.optional(), imageUrl: partImage.optional(),
 });
-export const partPatch = z.object(partFields).partial().refine(atLeastOne, NEED_ONE);
+// "" on update means: remove the photo.
+export const partPatch = z.object({ ...partFields, imageUrl: z.union([z.literal(""), partImage]) }).partial().refine(atLeastOne, NEED_ONE);
 
 const text50 = z.string().max(50).optional();
 export const partsQuery = z.object({ source: z.enum(SOURCES).optional(), make: text50, model: text50, category: text50 });

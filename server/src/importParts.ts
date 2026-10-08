@@ -23,12 +23,15 @@ console.log(`${rows.length} valid rows.`);
 if (dryRun) { console.log("Dry run: nothing written."); process.exit(0); }
 
 await mongoose.connect(process.env.MONGODB_URI as string);
-const result = await Part.bulkWrite(rows.map(({ stock, ...fields }) => ({
+const result = await Part.bulkWrite(rows.map(({ stock, ...all }) => {
+  const fields = Object.fromEntries(Object.entries(all).filter(([, v]) => v !== undefined)) as typeof all; // blank cells keep what is already stored
+  return {
   updateOne: {
     filter: { partNo: fields.partNo, make: fields.make, model: fields.model, source: fields.source },
     update: updateStock ? { $set: { ...fields, stock } } : { $set: fields, $setOnInsert: { stock } },
     upsert: true,
   },
-})));
+  };
+}));
 console.log(`Added ${result.upsertedCount}, updated ${result.modifiedCount}.`);
 await mongoose.disconnect();

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useCart } from "../components/CartContext";
+import PartImage from "../components/PartImage";
 import type { Part } from "../../../shared/types";
 
 /** One part: what it fits, whether it is in stock, and add to cart with a quantity. */
@@ -33,7 +34,7 @@ export default function PartDetail() {
     <main className="container" style={{ paddingBottom: 96 }}>
       <p className="crumb"><Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / {part.name}</p>
       <div className="detail">
-        <div className="ph detail-ph">[PHOTO]</div>
+        <PartImage part={part} width={900} className="detail-ph" />
         <div className="stack" style={{ gap: 16 }}>
           <span className={`badge ${china ? "china" : "stock"}`} style={{ alignSelf: "flex-start" }}>{stockText}</span>
           <h1 style={{ margin: 0, fontSize: 40 }}>{part.name}</h1>

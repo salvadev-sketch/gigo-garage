@@ -158,3 +158,6 @@ a{color:inherit;text-decoration:none}
 .specs dt{color:var(--muted)}
 .specs dd{margin:0;font-weight:600}
 @media (max-width:760px){.detail{grid-template-columns:1fr}.detail-ph{min-height:220px}}
+.ph{overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-sm{width:56px;height:56px;border-radius:10px;font-size:11px}

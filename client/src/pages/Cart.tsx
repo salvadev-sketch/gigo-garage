@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
+import PartImage from "../components/PartImage";
 import { useConfig } from "../config";
 import { bif } from "../format";
 import { computeTotals } from "../../../shared/pricing";
@@ -20,7 +21,7 @@ export default function Cart() {
           <div className="stack" style={{ flex: "1 1 600px" }}>
             {items.map(({ part, qty }) => (
               <div className="cart-item" key={part._id}>
-                <div className="ph thumb">[PHOTO]</div>
+                <PartImage part={part} width={200} className="thumb" />
                 <div className="grow">
                   <b style={{ fontSize: 18 }}>{part.name}</b>
                   <div className="muted" style={{ fontSize: 14, margin: "4px 0 8px" }}>Fits: {part.make} {part.model} · {part.partNo}</div>

@@ -7,6 +7,7 @@ export interface Part {
   _id: string; name: string; category: string; partNo: string;
   make: string; model: string; years: number[];
   price: number; stock: number; source: PartSource; leadTimeWeeks?: number;
+  /** Cloudinary photo */ imageUrl?: string;
 }
 export interface Booking {
   _id: string; carId: string; valid: boolean; completedAt?: string; customerName: string; phone: string;
