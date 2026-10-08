@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { api } from "../api";
 import TrackRequest from "../components/TrackRequest";
+import { site } from "../siteInfo";
 
 const KEY = "gigo-china-request";
 const makes = ["Toyota", "Nissan", "Honda", "Mitsubishi", "Suzuki", "Subaru", "Other"];
@@ -58,7 +59,7 @@ export default function ChinaRequest() {
             <div className="msg-ok" role="status">
               Request received. Your request number:
               <span className="carid">{requestNo}</span>
-              Keep it to follow your order. If you have a photo of the part, send it on WhatsApp [WHATSAPP NUMBER] with this number.
+              Keep it to follow your order. If you have a photo of the part, send it on WhatsApp {site.whatsappDisplay} with this number.
             </div>
           )}
           {state === "error" && <p className="msg-err" role="alert">Something went wrong. Please check your details and try again.</p>}

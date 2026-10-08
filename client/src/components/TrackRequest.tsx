@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { api } from "../api";
 import { bif } from "../format";
+import { site } from "../siteInfo";
 import type { ChinaStatus, ChinaTrack } from "../../../shared/types";
 
 const flow: { id: ChinaStatus; text: string }[] = [
@@ -39,7 +40,7 @@ export default function TrackRequest({ initial = "" }: { initial?: string }) {
           {found.quote !== undefined && (
             <p className="msg-ok" style={{ margin: 0 }}>
               Quote: {bif(found.quote)}{found.deposit !== undefined ? ` · Deposit to pay now: ${bif(found.deposit)}` : ""}.
-              Pay by Lumicash or bank transfer and send us the reference on WhatsApp [WHATSAPP NUMBER].
+              Pay by Lumicash or bank transfer and send us the reference on WhatsApp {site.whatsappDisplay}.
             </p>
           )}
           <ol className="steps">
