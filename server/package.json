@@ -6,11 +6,12 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "seed": "tsx src/seed.ts",
-    "set-role": "tsx src/setRole.ts",
+    "set-role": "tsx src/setRole.ts", "import-parts": "tsx src/importParts.ts",
     "start": "node dist/server/src/index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "csv-parse": "^7.0.3",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-errors": "^3.1.1",

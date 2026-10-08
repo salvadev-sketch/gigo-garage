@@ -50,7 +50,18 @@ cd client && npm install && npm run dev
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
 - `LUMICASH_NUMBER`, `BANK_NAME`, `BANK_ACCOUNT`, `PICKUP_ADDRESS` shown at checkout (placeholders until set)
 
+## Load your real parts
+Fill `server/data/parts.template.csv` (one part per row; years as `2010-2013` or `2010;2011`; source `shop` or `china`), then:
+```bash
+cd server
+npm run import-parts -- data/parts.csv --dry-run   # checks every row, writes nothing
+npm run import-parts -- data/parts.csv             # adds new parts, updates existing ones
+```
+Parts are matched by part number + make + model + source. Stock of existing parts is not overwritten (orders change it) unless you add `--update-stock`. If any row is invalid nothing is imported and the problem lines are listed.
+
 ## Deploy notes
+- Server: `render.yaml` is a Render blueprint (build `npm run build`, start `npm start`, health check `/health`).
+- Client: `client/vercel.json` makes page links such as `/shop/123` work on refresh. In Vercel set Root Directory to `client` and keep "Include source files outside of the Root Directory" on (the client imports `shared/`).
 - Client (Vercel): set `VITE_API_URL` to the Render server URL, plus the `VITE_FIREBASE_*` values.
 - Server (Render): set `MONGODB_URI`, `FIREBASE_SERVICE_ACCOUNT`, `CORS_ORIGINS`. Add the Vercel domain to Firebase > Authentication > Settings > Authorized domains.
 - Rate limits: 300 requests / 15 min per IP on the API, 20 / hour on public create routes (bookings, orders, China requests).
@@ -91,7 +102,7 @@ Users must sign in again after a role change.
 | POST/PATCH/DELETE | /api/parts (shop staff) | Manage the parts catalogue |
 
 ## Roadmap
-1. Seed parts and vehicle catalogue
+1. Enter the real parts catalogue (import tool is ready, needs your data)
 2. Automatic Lumicash / bank payment confirmation (needs a provider API; staff confirm by hand today)
 3. SMS/WhatsApp notifications
 4. Deploy (Vercel + Render)

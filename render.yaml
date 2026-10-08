@@ -1,0 +1,28 @@
+# Render blueprint for the API. Secrets (sync: false) are entered in the Render dashboard.
+services:
+  - type: web
+    name: gigo-garage-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: CHINA_DEPOSIT_PERCENT
+        value: "50"
+      - key: DELIVERY_FEE
+        value: "0"
+      - key: LUMICASH_NUMBER
+        sync: false
+      - key: BANK_NAME
+        sync: false
+      - key: BANK_ACCOUNT
+        sync: false
+      - key: PICKUP_ADDRESS
+        sync: false
