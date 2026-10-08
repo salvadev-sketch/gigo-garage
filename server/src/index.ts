@@ -1,11 +1,13 @@
 import "dotenv/config";
 import express from "express";
+import helmet from "helmet";
 import mongoose from "mongoose";
 import routes from "./routes/index.js";
 import { apiLimiter, corsPolicy, formLimiter } from "./middleware/security.js";
 
 const app = express();
 app.set("trust proxy", 1); // behind Render's proxy, so rate limits see the real client IP
+app.use(helmet()); // security headers (JSON API only, so the default policy is fine)
 app.use(corsPolicy());
 app.use(express.json());
 app.get("/health", (_req, res) => res.json({ ok: true }));
