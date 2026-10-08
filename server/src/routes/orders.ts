@@ -5,6 +5,7 @@ import { shopConfig } from "../config.js";
 import { computeTotals } from "../../../shared/pricing.js";
 import { checkId, validateBody } from "../middleware/validate.js";
 import { orderCreate, orderPatch } from "../schemas.js";
+import { notify } from "../services/notify.js";
 import { releaseStock, reserveStock, StockLine } from "../services/stock.js";
 
 const r = Router();
@@ -44,6 +45,7 @@ r.post("/orders", validateBody(orderCreate), async (req, res) => {
       subtotal: t.shopSubtotal + t.chinaSubtotal, deposit: t.deposit, deliveryFee: t.deliveryFee, total: t.dueNow,
       status: "pending",
     });
+    void notify("order_received", phone, { orderNo: order.orderNo ?? "", total: order.total ?? 0 });
     res.status(201).json({ orderNo: order.orderNo, total: order.total });
   } catch (e) {
     await releaseStock(lines); // the order was not saved, so do not keep the parts reserved
@@ -77,6 +79,7 @@ r.patch("/orders/:id", shopAdmin, validateBody(orderPatch), async (req: StaffReq
     : status === "pending" ? { status, $unset: { paidAt: 1, confirmedBy: 1 } } : { status };
   const before = await Order.findOneAndUpdate({ _id: o._id, status: { $ne: "cancelled" } }, update, { new: false });
   if (!before) return res.status(409).json({ error: "Order is cancelled" });
+  if (before.status !== status && (status === "paid" || status === "cancelled")) void notify(status === "paid" ? "order_paid" : "order_cancelled", o.phone, { orderNo: o.orderNo ?? "" });
   if (status === "cancelled") {
     await releaseStock(before.items.map((i) => ({ partId: i.partId ?? "", qty: i.qty ?? 0, source: (i.source ?? "shop") as "shop" | "china" })));
   }

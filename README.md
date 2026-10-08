@@ -49,12 +49,19 @@ cd client && npm install && npm run dev
 - `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` part photos (secret stays on the server)
+- `NOTIFY_CHANNEL` (`sms` or `whatsapp`), `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, `TWILIO_WHATSAPP_FROM` customer messages; `DEFAULT_COUNTRY_CODE` (257), `NOTIFY_MAX_PER_PHONE_DAY` (6)
 - `LUMICASH_NUMBER`, `BANK_NAME`, `BANK_ACCOUNT`, `PICKUP_ADDRESS` shown at checkout (placeholders until set)
+
+## Customer messages (SMS / WhatsApp via Twilio)
+Customers get a message when: a booking is received, confirmed, fixed or cancelled; an order is received, paid or cancelled; a China request is quoted, arrives or is ready. Set `NOTIFY_CHANNEL` and the Twilio values; with `NOTIFY_CHANNEL` empty nothing is sent. Wording is in `server/src/services/notify.ts`.
+- Sending never blocks or breaks a booking or order: if Twilio fails, the error is logged and the request still succeeds.
+- Each phone number gets at most `NOTIFY_MAX_PER_PHONE_DAY` messages per day (counted in memory, so it resets when the server restarts), because the public forms accept any number.
+- Check with Twilio that Burundi (+257) is supported for your sender type, and its price. WhatsApp messages sent outside a 24-hour customer conversation need a WhatsApp-approved template, which is not set up here.
 
 ## Part photos (Cloudinary)
 1. Create a free Cloudinary account and copy the cloud name, API key and API secret from its dashboard into `server/.env` (and Render).
 2. In the shop dashboard, add a photo when adding a part, or use "Add photo / Change photo / Remove" on any row.
-Photos go from the browser straight to Cloudinary (JPG, PNG or WebP, max 5 MB), signed by the server, and are shown resized and optimised. Only images from your own Cloudinary account are accepted. Photos are stored in the `gigo-garage/parts` folder; removing a photo or deleting a part does not delete the file from Cloudinary.
+Photos go from the browser straight to Cloudinary (JPG, PNG or WebP, max 5 MB), signed by the server, and are shown resized and optimised. Only images from your own Cloudinary account are accepted. Photos are stored in the `gigo-garage/parts` folder; replacing or removing a photo, or deleting a part, also deletes the file from Cloudinary (unless another part still uses it). A photo uploaded but never saved on a part stays on Cloudinary.
 The CSV import also accepts an optional `imageUrl` column with a Cloudinary URL.
 
 ## Load your real parts
@@ -112,5 +119,5 @@ Users must sign in again after a role change.
 ## Roadmap
 1. Enter the real parts catalogue (import tool is ready, needs your data)
 2. Automatic Lumicash / bank payment confirmation (needs a provider API; staff confirm by hand today)
-3. SMS/WhatsApp notifications
+3. Message templates approved by WhatsApp, and Kirundi/French wording (messages are English only)
 4. Deploy (Vercel + Render)

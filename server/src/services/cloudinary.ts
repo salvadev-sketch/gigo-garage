@@ -20,3 +20,26 @@ export const isOurImage = (url: string) => {
   const name = process.env.CLOUDINARY_CLOUD_NAME;
   return !!name && url.startsWith(`https://res.cloudinary.com/${name}/image/upload/`);
 };
+
+/** "https://res.cloudinary.com/x/image/upload/v123/gigo-garage/parts/abc.jpg" -> "gigo-garage/parts/abc". Only our own upload folder is ever deleted. */
+export const publicIdOf = (url: string) => {
+  const id = url.match(/\/image\/upload\/(?:v\d+\/)?(.+)\.[a-z0-9]+$/i)?.[1];
+  return id && id.startsWith(`${UPLOAD_FOLDER}/`) ? id : null;
+};
+
+/** Deletes a photo from Cloudinary. Best effort: a failure is logged and never blocks the request that triggered it. */
+export async function destroyImage(url: string): Promise<void> {
+  const c = cloudinaryConfig();
+  const publicId = isOurImage(url) ? publicIdOf(url) : null;
+  if (!c || !publicId) return;
+  try {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const body = new URLSearchParams({
+      public_id: publicId, timestamp: String(timestamp), api_key: c.apiKey, signature: sign({ public_id: publicId, timestamp }, c.apiSecret),
+    });
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${c.cloudName}/image/destroy`, { method: "POST", body });
+    if (!res.ok) console.error(`Cloudinary delete failed (${res.status}) for ${publicId}`);
+  } catch (e) {
+    console.error("Cloudinary delete failed:", e instanceof Error ? e.message : e);
+  }
+}

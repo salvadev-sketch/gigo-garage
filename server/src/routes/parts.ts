@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Part } from "../models/index.js";
 import { shopAdmin } from "../middleware/admin.js";
 import { checkId, validateBody, validateQuery } from "../middleware/validate.js";
+import { dropImage } from "../services/partImages.js";
 import { partCreate, partPatch, partsQuery } from "../schemas.js";
 
 const r = Router();
@@ -32,12 +33,15 @@ r.post("/parts", shopAdmin, validateBody(partCreate), async (req, res) => res.st
 r.patch("/parts/:id", shopAdmin, validateBody(partPatch), async (req, res) => {
   const update: Record<string, unknown> = Object.fromEntries(Object.entries(fields(req.body)).filter(([, v]) => v !== undefined));
   if (update.imageUrl === "") { delete update.imageUrl; update.$unset = { imageUrl: 1 }; } // remove the photo
+  const old = "imageUrl" in update || update.$unset ? await Part.findById(req.params.id) : null;
   const p = await Part.findByIdAndUpdate(req.params.id, update, { new: true });
   if (!p) return res.status(404).json({ error: "Part not found" });
+  if (old?.imageUrl && old.imageUrl !== p.imageUrl) void dropImage(old.imageUrl, String(p._id)); // photo replaced or removed
   res.json(p);
 });
 r.delete("/parts/:id", shopAdmin, async (req, res) => {
-  await Part.findByIdAndDelete(req.params.id);
+  const gone = await Part.findByIdAndDelete(req.params.id);
+  if (gone?.imageUrl) void dropImage(gone.imageUrl, String(gone._id));
   res.json({ ok: true });
 });
 
