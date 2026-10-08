@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useCart } from "../components/CartContext";
 import type { Part } from "../../../shared/types";
@@ -119,7 +120,7 @@ export default function Shop() {
             {group(shop)}
           </section>
           <section id="china">
-            <div><h2>Available in China</h2><p className="muted" style={{ margin: 0, maxWidth: 560 }}>Not in stock here. We send you a quote first, you pay a deposit, then you track your order until it arrives.</p></div>
+            <div><h2>Available in China</h2><p className="muted" style={{ margin: 0, maxWidth: 560 }}>Not in stock here. We send you a quote first, you pay a deposit, then you track your order until it arrives. Part not listed? <Link to="/china" style={{ color: "var(--accent)", fontWeight: 700 }}>Request it from China</Link>.</p></div>
             {group(china)}
           </section>
         </div>

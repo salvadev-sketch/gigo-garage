@@ -19,7 +19,7 @@ function Row({ r, admin, reload }: { r: ChinaRequest; admin: AdminCtx; reload: (
 
   return (
     <tr>
-      <td>{r.partNo ?? "—"}<br /><span className="muted">{r.vehicle}</span></td>
+      <td><b>{r.requestNo}</b><br />{r.partNo ?? "—"}<br /><span className="muted">{[r.vehicle, r.notes].filter(Boolean).join(" · ")}</span></td>
       <td>{r.phone}</td>
       <td>
         <div className="actions">

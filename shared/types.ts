@@ -22,8 +22,12 @@ export interface Order {
 }
 export interface ShopConfig { chinaDepositPercent: number; deliveryFee: number }
 export interface ChinaRequest {
-  _id: string; partNo?: string; photoUrl?: string; vehicle: string;
+  _id: string; requestNo: string; partNo?: string; photoUrl?: string; vehicle: string; notes?: string;
   phone: string; quote?: number; deposit?: number; status: ChinaStatus;
+}
+/** Public view of a China request (no phone number). */
+export interface ChinaTrack {
+  requestNo: string; status: ChinaStatus; partNo?: string; vehicle?: string; quote?: number; deposit?: number;
 }
 
 /** Public view of a car in the garage waiting list (no personal data). */

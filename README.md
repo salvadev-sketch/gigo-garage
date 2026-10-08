@@ -61,7 +61,8 @@ cd client && npm install && npm run dev
 | PATCH | /api/bookings/:id (garage key) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
 | GET | /api/config | Deposit percent and delivery fee |
 | POST | /api/orders | Create order (server recomputes totals), returns order number |
-| POST | /api/china-requests | Request a part from China |
+| POST | /api/china-requests | Customer requests a part from China, returns request number (CN-0001) |
+| GET | /api/china-requests/track/:requestNo | Public status, quote and deposit |
 | GET/PATCH | /api/china-requests (shop key) | List / add quote and update status |
 | GET/PATCH | /api/orders (shop key) | List orders / confirm payment, mark done |
 | POST/PATCH/DELETE | /api/parts (shop key) | Manage the parts catalogue |

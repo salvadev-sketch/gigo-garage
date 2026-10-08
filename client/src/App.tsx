@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import Garage from "./pages/Garage";
+import ChinaRequest from "./pages/ChinaRequest";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Order from "./pages/Order";
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/garage" element={<Garage />} />
+        <Route path="/china" element={<ChinaRequest />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order" element={<Order />} />

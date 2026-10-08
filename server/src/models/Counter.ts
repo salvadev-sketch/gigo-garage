@@ -11,3 +11,5 @@ async function nextSeq(id: string, prefix: string): Promise<string> {
 export const nextCarId = () => nextSeq("carId", "GA-");
 /** Next order number, e.g. OR-0001. */
 export const nextOrderNo = () => nextSeq("orderNo", "OR-");
+/** Next China request number, e.g. CN-0001. */
+export const nextRequestNo = () => nextSeq("requestNo", "CN-");

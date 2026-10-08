@@ -81,7 +81,7 @@ export default function Home() {
           <div style={{ flex: "1 1 400px" }}>
             <h2>Can't find your part?</h2>
             <p>Send the part number or a photo. We order it from China and you track it until it arrives.</p>
-            <Link to="/shop" className="btn btn-white">Order from China</Link>
+            <Link to="/china" className="btn btn-white">Order from China</Link>
           </div>
           <div className="ph">[PHOTO]</div>
         </div>
