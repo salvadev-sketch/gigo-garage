@@ -1,41 +1,59 @@
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import { api } from "../api";
+import { onIdTokenChanged, signInWithEmailAndPassword, signOut as fbSignOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { DASHBOARD_ROLES, isStaffRole, StaffRole } from "../../../shared/roles";
 
-export type Role = "shop" | "garage";
-export interface AdminCtx { headers: Record<string, string>; signOut: () => void }
+export type Dashboard = keyof typeof DASHBOARD_ROLES;
+export interface AdminCtx { headers: Record<string, string>; role: StaffRole; signOut: () => void }
 
-/** Asks for the dashboard key, checks it with the server, then renders the dashboard. */
-export default function AdminGate({ role, title, children }: { role: Role; title: string; children: (admin: AdminCtx) => ReactNode }) {
-  const storeKey = `gigo-admin-${role}`;
-  const [key, setKey] = useState(() => sessionStorage.getItem(storeKey) ?? "");
-  const [input, setInput] = useState("");
-  const [ok, setOk] = useState(false);
+type Session = { token: string; role: StaffRole } | "loading" | "none" | "forbidden";
+
+/** Firebase sign-in for staff. Shows the dashboard only if the account's role may open it. */
+export default function AdminGate({ role, title, children }: { role: Dashboard; title: string; children: (admin: AdminCtx) => ReactNode }) {
+  const [session, setSession] = useState<Session>("loading");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const signOut = () => { sessionStorage.removeItem(storeKey); setKey(""); setOk(false); };
-  const admin = useMemo<AdminCtx>(() => ({ headers: { "x-admin-key": key }, signOut }), [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Fires on sign-in, sign-out and each hourly token refresh, so the Bearer token never goes stale.
+  useEffect(() => onIdTokenChanged(auth, async (user) => {
+    if (!user) return setSession("none");
+    const result = await user.getIdTokenResult();
+    const userRole = result.claims.role;
+    const allowed = isStaffRole(userRole) && (DASHBOARD_ROLES[role] as readonly string[]).includes(userRole);
+    setSession(allowed ? { token: result.token, role: userRole as StaffRole } : "forbidden");
+  }), [role]);
 
-  useEffect(() => {
-    if (!key) return;
-    api(`/admin/${role}/ping`, { headers: { "x-admin-key": key } })
-      .then(() => { setOk(true); setError(""); })
-      .catch(() => { signOut(); setError("Wrong key or server unavailable."); });
-  }, [key, role]); // eslint-disable-line react-hooks/exhaustive-deps
+  const signOut = () => { void fbSignOut(auth); };
+  const admin = useMemo<AdminCtx | null>(
+    () => (typeof session === "object" ? { headers: { Authorization: `Bearer ${session.token}` }, role: session.role, signOut } : null),
+    [session],
+  );
 
-  const login = (e: FormEvent) => {
+  const login = async (e: FormEvent) => {
     e.preventDefault();
-    sessionStorage.setItem(storeKey, input);
-    setKey(input);
-    setInput("");
+    setError("");
+    try { await signInWithEmailAndPassword(auth, email, password); setPassword(""); }
+    catch { setError("Wrong email or password."); }
   };
 
-  if (key && ok) return <>{children(admin)}</>;
-  if (key) return <main className="container"><p className="empty" style={{ marginTop: 32 }}>Checking key...</p></main>;
+  if (admin) return <>{children(admin)}</>;
+  if (session === "loading") return <main className="container"><p className="empty" style={{ marginTop: 32 }}>Loading...</p></main>;
+  if (session === "forbidden") {
+    return (
+      <main className="container" style={{ padding: "56px 24px 96px", maxWidth: 520 }}>
+        <h1 style={{ fontSize: 36 }}>{title}</h1>
+        <p className="msg-err" role="alert">Your account does not have access to this dashboard.</p>
+        <button className="btn btn-outline" onClick={signOut}>Sign out</button>
+      </main>
+    );
+  }
   return (
     <main className="container" style={{ padding: "56px 24px 96px", maxWidth: 520 }}>
       <h1 style={{ fontSize: 36 }}>{title}</h1>
       <form className="card-gray" onSubmit={login}>
-        <label className="field">Dashboard key<input type="password" required value={input} onChange={(e) => setInput(e.target.value)} /></label>
+        <label className="field">Email<input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
+        <label className="field">Password<input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
         <button className="btn btn-primary" type="submit">Sign in</button>
         {error && <p className="msg-err" role="alert">{error}</p>}
       </form>

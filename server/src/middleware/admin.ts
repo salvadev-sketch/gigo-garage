@@ -1,11 +1,27 @@
 import { NextFunction, Request, Response } from "express";
+import { DASHBOARD_ROLES, isStaffRole, StaffRole } from "../../../shared/roles.js";
+import { firebaseAuth } from "../firebase.js";
 
-// Temporary key-based guards, one per dashboard. Replace with real auth (JWT/Firebase) later.
-// A missing environment key always denies access.
-const guard = (envName: string) => (req: Request, res: Response, next: NextFunction) => {
-  const expected = process.env[envName];
-  return expected && req.header("x-admin-key") === expected ? next() : res.status(401).json({ error: "Unauthorized" });
-};
+export interface StaffUser { uid: string; email?: string; role: StaffRole }
+export type StaffRequest = Request & { staff?: StaffUser };
 
-export const shopAdmin = guard("ADMIN_KEY_SHOP");
-export const garageAdmin = guard("ADMIN_KEY_GARAGE");
+/** Verifies the Firebase ID token (Authorization: Bearer ...) and checks the role claim. */
+export const requireRole = (...allowed: readonly StaffRole[]) =>
+  async (req: StaffRequest, res: Response, next: NextFunction) => {
+    const token = req.header("authorization")?.match(/^Bearer (.+)$/i)?.[1];
+    if (!token) return res.status(401).json({ error: "Unauthorized" });
+    try {
+      const decoded = await firebaseAuth().verifyIdToken(token);
+      if (!isStaffRole(decoded.role) || !allowed.includes(decoded.role)) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      req.staff = { uid: decoded.uid, email: decoded.email, role: decoded.role };
+      return next();
+    } catch {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+  };
+
+export const shopAdmin = requireRole(...DASHBOARD_ROLES.shop);
+export const garageAdmin = requireRole(...DASHBOARD_ROLES.garage);
+export const ownerOnly = requireRole("owner");

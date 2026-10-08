@@ -43,11 +43,24 @@ cd client && npm install && npm run dev
 
 ## Environment (server/.env)
 - `MONGODB_URI` MongoDB connection string
-- `ADMIN_KEY_SHOP` key for the shop dashboard (temporary, replace with real auth)
-- `ADMIN_KEY_GARAGE` key for the garage dashboard (temporary, replace with real auth)
+- `FIREBASE_SERVICE_ACCOUNT` Firebase service account JSON on one line (or set `GOOGLE_APPLICATION_CREDENTIALS` to the key file path)
 - `PORT` default 4000
 - `CHINA_DEPOSIT_PERCENT` share of a China part's price paid now as deposit (placeholder: 50)
 - `DELIVERY_FEE` delivery fee in BIF (placeholder: 0)
+
+## Staff auth (Firebase + RBAC)
+Staff sign in with Firebase Auth (email and password). The role lives in a Firebase custom claim `role`:
+- `owner`: both dashboards, and can give roles to others
+- `shop_staff`: shop dashboard
+- `garage_staff`: garage dashboard
+
+Setup:
+1. Firebase console: create a project, enable Authentication > Email/Password, add staff users.
+2. Server: put the service account JSON in `server/.env` (`FIREBASE_SERVICE_ACCOUNT`).
+3. Client: copy `client/.env.example` to `client/.env` and fill in the web app settings.
+4. Make the first owner: `cd server && npm run set-role -- you@example.com owner`
+5. After that the owner can use `POST /api/admin/roles` with `{ "email": "...", "role": "shop_staff" }` (`null` removes the role).
+Users must sign in again after a role change.
 
 ## API
 | Method | Path | Purpose |
@@ -56,20 +69,21 @@ cd client && npm install && npm run dev
 | POST | /api/bookings | Create booking, returns Car ID (GA-0001) and waiting list position |
 | GET | /api/queue | Public waiting list of cars in the garage |
 | GET | /api/track/:carId | Public status and position by Car ID |
-| GET | /api/admin/shop/ping, /api/admin/garage/ping | Check a dashboard key |
-| GET | /api/bookings (garage key) | List all bookings |
-| PATCH | /api/bookings/:id (garage key) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
+| GET | /api/admin/shop/ping, /api/admin/garage/ping | Check dashboard access (Bearer token) |
+| POST | /api/admin/roles (owner) | Set a staff role by email |
+| GET | /api/bookings (garage staff) | List all bookings |
+| PATCH | /api/bookings/:id (garage staff) | Update status. `done` or `cancelled` invalidates the Car ID and removes the car from the waiting list |
 | GET | /api/config | Deposit percent and delivery fee |
 | POST | /api/orders | Create order (server recomputes totals), returns order number |
 | POST | /api/china-requests | Customer requests a part from China, returns request number (CN-0001) |
 | GET | /api/china-requests/track/:requestNo | Public status, quote and deposit |
-| GET/PATCH | /api/china-requests (shop key) | List / add quote and update status |
-| GET/PATCH | /api/orders (shop key) | List orders / confirm payment, mark done |
-| POST/PATCH/DELETE | /api/parts (shop key) | Manage the parts catalogue |
+| GET/PATCH | /api/china-requests (shop staff) | List / add quote and update status |
+| GET/PATCH | /api/orders (shop staff) | List orders / confirm payment, mark done |
+| POST/PATCH/DELETE | /api/parts (shop staff) | Manage the parts catalogue |
 
 ## Roadmap
 1. Seed parts and vehicle catalogue
 2. Product detail page
 3. Lumicash and bank payment confirmation
-4. Real admin auth, SMS/WhatsApp notifications
+4. SMS/WhatsApp notifications
 5. Deploy (Vercel + Render)
